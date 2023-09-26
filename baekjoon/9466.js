@@ -1,45 +1,53 @@
-let fs = require("fs");
+const fs = require("fs");
+const input = fs.readFileSync("/dev/stdin").toString().split("\n");
 
-let input = fs.readFileSync("/dev/stdin").toString().split("\n");
-
-
-let testCases = Number(input[0]);
-
+//testCases
+let t = Number(input[0]);
 let line = 1;
-while(testCases--){
-    let n = Number(input[line]);
-    let student = [0,...input[line+1].split(" ").map(Number)];
-    let visited = new Array(n+1).fill(false);
-    let finished = new Array(n+1).fill(false); //방향 그래프의 사이클은 스택을 이용해야함 --> 스택을 생각해야하기 때문에 
-    let result = []
 
+//방향 그래프의 순환 찾기임
 
-    let cnt = 0;
-    for(let i = 1; i <=n;i++){
-       if(!visited[i]) dfs(i,student,visited,finished,result);
+// 4 -> 7 -> 6
+
+while (t--) {
+  let n = Number(input[line]);
+  let graph = [0, ...input[line + 1].split(" ").map(Number)];
+
+  let visited = new Array(n + 1).fill(false);
+  let finished = new Array(n + 1).fill(false);
+  //dfs는 스택의 일종이기 때문에, 빠져 나오는 것을 finished에 방문 여부를 하고
+  let result = []; //  먼저 나온것들을 담아주는 배열을 선언
+  //순환인것들을 담아주는 것
+
+  for (let i = 1; i <= n; i++) {
+    if (!visited[i]) {
+      dfs(i, graph, visited, result);
     }
+  }
 
-    
-    line += 2;
-    console.log(n - result.length);
-
+  line += 2;
+  //
+  console.log(n - result.length);
 }
 
-function dfs(x,graph,visited,finished,result){
-    visited[x] = true;
-    let y = graph[x]; //다음 노드 
-    if(!visited[y]){
-        dfs(y,graph,visited,finished,result);
-    }
-    else if(!finished[y]){
-        while(y !=x){
-            result.push(y);
-            y = graph[y];
-        }
-        result.push(x);
-    }
+function dfs(x, graph, visited, finished, result) {
+  visited[x] = true; //현재 방문한 것을 방문 처리
+  let nxt = graph[x];
+  if (!visited[nxt]) {
+    dfs(y, graph, visited, finished, result);
+  }
 
-    finished[x] =true;
-    
+  //나가는건  top 부터 순서대로 나가기 때문에 이렇게 queue 로직과 비슷함
+  //방문을 했지만, 스택에서 빠져나가지 않았다면,
+  else if (!finished[nxt]) {
+    //여기는 단순히 사이클이 포함된 노드들을 저장하는 로직임
+    while (nxt != x) {
+      result.push(nxt);
+      nxt = graph[nxt];
+    }
+    result.push(x);
+  }
+  //방문을 했고, finished에 
+  //현재 노드에 대한 처리를 하는 것이니까 
+  finished[x] = true;
 }
-
